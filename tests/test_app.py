@@ -28,8 +28,10 @@ def test_index_route(client):
 # TASK 1
 def test_weapons_api_status_code(client):
     """Test that the weapons API returns a 200 status code."""
-    pass
-    # Tip - look at test_index_route, use the same template, just change the api endpoint
+    # Send a GET request to the weapons API endpoint
+    response = client.get('/api/weapons')
+    # Verify that the response status code is 200 (OK)
+    assert response.status_code == 200
 
 
 
@@ -53,16 +55,19 @@ def test_weapons_api(client):
 def test_empty_cart(client):
     """Test that a new session has an empty cart."""
     # Send a GET request to the cart API endpoint
-    
-    # Verify the response status code is 200 (OK)
-    
-    # Parse the JSON response data
-    
-    # Verify the response is a list (Tip Google search how to use assert with isinstance())
-   
-    # Verify the cart is empty (new session)
+    response = client.get('/api/cart')
 
-    pass
+    # Verify the response status code is 200 (OK)
+    assert response.status_code == 200
+
+    # Parse the JSON response data
+    data = json.loads(response.data)
+
+    # Verify the response is a list (Tip Google search how to use assert with isinstance())
+    assert isinstance(data, list)
+
+    # Verify the cart is empty (new session)
+    assert len(data) == 0
 
 
 def test_add_to_cart(client):
@@ -89,32 +94,37 @@ def test_add_to_cart(client):
 def test_add_invalid_weapon(client):
     """Test adding a non-existent weapon ID."""
     # Try to add a weapon with an invalid ID
+    response = client.post('/api/cart',
+                          json={"id": 9999},
+                          content_type='application/json')
 
     # Verify the response status code is 404 (Not Found)
-
-    pass
+    assert response.status_code == 404
 
 # TASK 4
 # TIP - similar to test_add_to_cart
 def test_clear_cart(client):
     """Test clearing the cart."""
     # Add an item to the cart first using /api/cart API
-
+    client.post('/api/cart', json={"id": 1}, content_type='application/json')
 
     # Clear the cart using the clear endpoint /api/cart/clear
-
+    response = client.post('/api/cart/clear')
 
     # Verify the response status code is 200 (OK)
+    assert response.status_code == 200
 
-    
     # Verify cart is empty after clearing by using GET /api/cart
+    response = client.get('/api/cart')
 
     # verify that the response status code is 200
+    assert response.status_code == 200
 
     # get response data
+    data = json.loads(response.data)
 
     # verify the length of response data is 0
-    pass
+    assert len(data) == 0
 
 
 def test_remove_from_cart(client):
@@ -140,7 +150,7 @@ def test_remove_from_cart(client):
 def test_remove_nonexistent_item(client):
     """Test removing an item that isn't in the cart."""
     # Try to remove an item that doesn't exist in the cart
+    response = client.post('/api/cart/remove/9999')
 
     # Verify the response status code is 404 (Not Found)
-
-    pass
+    assert response.status_code == 404
